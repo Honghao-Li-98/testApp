@@ -113,6 +113,26 @@ func handler(timeoutContext context.Context, request events.APIGatewayProxyReque
 	}, nil
 }
 
+/*
+2023-03-02T03:25:58.323-05:00	REPORT RequestId: 0d00d5d7-f29a-4993-826f-4ff207301ad4 Duration: 2.37 ms Billed Duration: 3 ms Memory Size: 128 MB Max Memory Used: 50 MB
+
+2023-03-02T03:25:59.229-05:00	START RequestId: 33660246-3cef-4ed7-99cb-4587b4e5c6e9 Version: $LATEST
+
+2023-03-02T03:25:59.229-05:00	2023-03-02 08:25:59.229783344 +0000 UTC m=+152.205445412
+
+2023-03-02T03:25:59.231-05:00	2023-03-02 08:25:59.231066742 +0000 UTC m=+152.206728811
+
+2023-03-02T03:25:59.231-05:00	2023-03-02 08:25:59.231098849 +0000 UTC m=+152.206760935
+
+2023-03-02T03:25:59.231-05:00	END RequestId: 33660246-3cef-4ed7-99cb-4587b4e5c6e9
+
+2023-03-02T03:25:59.231-05:00
+
+Copy
+REPORT RequestId: 33660246-3cef-4ed7-99cb-4587b4e5c6e9	Duration: 2.63 ms	Billed Duration: 3 ms	Memory Size: 128 MB	Max Memory Used: 50 MB
+REPORT RequestId: 33660246-3cef-4ed7-99cb-4587b4e5c6e9 Duration: 2.63 ms Billed Duration: 3 ms Memory Size: 128 MB Max Memory Used: 50 MB
+*/
+
 func main() {
 	lambda.Start(handler)
 }
