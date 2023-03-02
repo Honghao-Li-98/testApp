@@ -27,14 +27,15 @@ type MySecret struct {
 	MONGODB_URL string `json:"MONGODB_URL"`
 }
 
-func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	time1 := time.Now()
-	fmt.Println(time1)
+var (
+	client *mongo.Client
+)
 
+func init() {
 	// Create a new AWS session
-	sess, err := session.NewSession()
-	if err != nil {
-		log.Fatal(err)
+	sess, err1 := session.NewSession()
+	if err1 != nil {
+		log.Fatal(err1)
 	}
 
 	// Create a new Secrets Manager client
@@ -46,28 +47,32 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*event
 	input := &secretsmanager.GetSecretValueInput{
 		SecretId: aws.String(os.Getenv("SECRET_ARN")),
 	}
-	result, err := svc.GetSecretValue(input)
-	if err != nil {
-		log.Fatal(err)
+	result, err2 := svc.GetSecretValue(input)
+	if err2 != nil {
+		log.Fatal(err2)
 	}
 
 	// Parse the secret value into a struct
 	var secret MySecret
-	err = json.Unmarshal([]byte(*result.SecretString), &secret)
-	if err != nil {
-		log.Fatal(err)
+	err3 := json.Unmarshal([]byte(*result.SecretString), &secret)
+	if err3 != nil {
+		log.Fatal(err3)
 	}
 
-	time2 := time.Now()
-	fmt.Println(time2)
-
-	// Connect to MongoDB using the URL from the secret
+	// Set up a MongoDB client
 	clientOptions := options.Client().ApplyURI(secret.MONGODB_URL)
-	client, err := mongo.Connect(ctx, clientOptions)
+	var err error
+	client, err = mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// defer client.Disconnect(ctx)
+}
+
+func handler(timeoutContext context.Context, request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+
+	// Create a context with a timeout of 1 second
+	timeoutContext, cancel := context.WithTimeout(timeoutContext, time.Second)
+	defer cancel()
 
 	// Get a handle to the "people" collection
 	peopleCollection := client.Database("test-db").Collection("people")
@@ -76,18 +81,18 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (*event
 	fmt.Println(time3)
 
 	// Find all documents in the "people" collection
-	cur, err := peopleCollection.Find(ctx, bson.M{})
+	cur, err := peopleCollection.Find(timeoutContext, bson.M{})
 	if err != nil {
 		log.Fatal(err)
 	}
-	// defer cur.Close(ctx)
+	// defer cur.Close(timeoutContext)
 
 	time4 := time.Now()
 	fmt.Println(time4)
 
 	// Decode the documents into a slice of Person objects
 	var people []Person
-	err = cur.All(ctx, &people)
+	err = cur.All(timeoutContext, &people)
 	if err != nil {
 		log.Fatal(err)
 	}
