@@ -5,12 +5,12 @@ import (
 )
 
 // List represents a singly-linked list that holds
-// values of any type.
-type List[T any] struct {
+// values of comparable type.
+type List[T comparable] struct {
 	head *Node[T]
 }
 
-type Node[T any] struct {
+type Node[T comparable] struct {
 	val  T
 	next *Node[T]
 }
